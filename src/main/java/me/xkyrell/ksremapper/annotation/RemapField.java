@@ -9,6 +9,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RemapField {
 
+    Mode mode();
+
     boolean isStatic() default false;
 
+    enum Mode {
+        GET, SET
+    }
 }
