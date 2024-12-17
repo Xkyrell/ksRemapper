@@ -7,4 +7,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Static { }
+public @interface RemapField {
+
+    boolean isStatic() default false;
+
+}

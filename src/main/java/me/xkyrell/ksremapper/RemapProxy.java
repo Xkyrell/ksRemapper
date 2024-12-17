@@ -4,6 +4,6 @@ public interface RemapProxy {
 
     Class<? extends RemapProxy> getProxyClass();
 
-    Object getHandle();
+    Object getProxyHandle();
 
 }

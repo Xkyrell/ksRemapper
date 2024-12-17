@@ -7,8 +7,8 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Class {
+public @interface RemapClass {
 
-    java.lang.Class<?> value();
+    Class<?> value();
 
 }
