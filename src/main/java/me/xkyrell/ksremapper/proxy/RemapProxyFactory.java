@@ -5,15 +5,23 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.reflect.Reflection;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import me.xkyrell.ksremapper.RemapConfig;
 import me.xkyrell.ksremapper.RemapProxy;
 import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationHandler;
 
+@RequiredArgsConstructor
 public class RemapProxyFactory {
 
+    private final RemapConfig config;
     private final LoadingCache<Class<? extends RemapProxy>, ProxyInvocationMapper> mappers =
             CacheBuilder.newBuilder().build(CacheLoader.from(this::loadMapper));
+
+    public RemapProxyFactory() {
+        this(RemapConfig.builder().build());
+    }
 
     public final <T extends RemapProxy> T remap(@NonNull Class<T> clazz, @NonNull Object handle) {
         ProxyInvocationMapper mapper = mappers.getUnchecked(clazz);
@@ -94,7 +102,7 @@ public class RemapProxyFactory {
     }
 
     protected ProxyInvocationMapper loadMapper(Class<? extends RemapProxy> clazz) {
-        throw new UnsupportedOperationException("Method loadMapper is not implemented");
+        return new ProxyInvocationMapper(clazz, config);
     }
 
     private <T extends RemapProxy> T createProxy(Class<T> clazz, ProxyInvocationMapper mapper, Object handle) {
