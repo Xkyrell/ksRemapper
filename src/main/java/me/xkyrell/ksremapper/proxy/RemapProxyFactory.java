@@ -63,14 +63,14 @@ public class RemapProxyFactory {
         return remap(clazz, instance);
     }
 
-    Class<?>[] getParameterTypes(Object[] unwrappedArgs) {
-        if (unwrappedArgs == null || unwrappedArgs.length == 0) {
+    Class<?>[] getParameterTypes(Object[] rawArgs) {
+        if (rawArgs == null || rawArgs.length == 0) {
             return new Class[0];
         }
 
-        Class<?>[] result = new Class[unwrappedArgs.length];
-        for (int i = 0; i < unwrappedArgs.length; i++) {
-            result[i] = unwrappedArgs[i].getClass();
+        Class<?>[] result = new Class[rawArgs.length];
+        for (int i = 0; i < rawArgs.length; i++) {
+            result[i] = rawArgs[i].getClass();
         }
         return result;
     }
