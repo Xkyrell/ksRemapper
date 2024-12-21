@@ -6,8 +6,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.reflect.Reflection;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import me.xkyrell.ksremapper.RemapConfig;
-import me.xkyrell.ksremapper.RemapProxy;
+import me.xkyrell.ksremapper.*;
 import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationHandler;
@@ -106,7 +105,7 @@ public class RemapProxyFactory {
     }
 
     private <T extends RemapProxy> T createProxy(Class<T> clazz, ProxyInvocationMapper mapper, Object handle) {
-        InvocationHandler handler = new ProxyInvocationHandler(mapper, handle);
+        InvocationHandler handler = new ProxyInvocationHandler(this, mapper, handle);
         return Reflection.newProxy(clazz, handler);
     }
 }
