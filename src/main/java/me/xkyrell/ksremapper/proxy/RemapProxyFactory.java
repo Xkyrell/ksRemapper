@@ -7,6 +7,8 @@ import com.google.common.reflect.Reflection;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.xkyrell.ksremapper.*;
+import me.xkyrell.ksremapper.util.TypeUtil;
+
 import javax.annotation.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.reflect.InvocationHandler;
@@ -69,7 +71,13 @@ public class RemapProxyFactory {
 
         Class<?>[] result = new Class[rawArgs.length];
         for (int i = 0; i < rawArgs.length; i++) {
-            result[i] = rawArgs[i].getClass();
+            Class<?> argClass = rawArgs[i].getClass();
+            if (argClass.isPrimitive()) {
+                result[i] = argClass;
+            }
+            else {
+                result[i] = TypeUtil.getPrimitiveType(argClass);
+            }
         }
         return result;
     }
