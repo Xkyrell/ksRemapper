@@ -12,7 +12,6 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,17 +31,6 @@ public class ProxyInvocationMapper {
     public FieldAccessor findField(Method method, RemapField remap, Class<?> rawReturnType) {
         FieldData data = new FieldData(method, rawReturnType, remap);
         return getFieldCache(remap.mode()).computeIfAbsent(data, __ -> {
-            if (remap.isStatic() && !Modifier.isStatic(method.getModifiers())) {
-                throw new IllegalStateException(String.format(
-                        "The static proxy method '%s' does not match the non-static target field", method.getName()
-                ));
-            }
-            if (!remap.isStatic() && Modifier.isStatic(method.getModifiers())) {
-                throw new IllegalStateException(String.format(
-                        "The proxy method '%s' does not match the static target field", method.getName()
-                ));
-            }
-
             String fieldName = config.fetchMember(method);
             return new DynamicFieldAccessor(getHandleClass(), fieldName, remap.mode().apply(method), remap);
         });
@@ -69,17 +57,6 @@ public class ProxyInvocationMapper {
 
     public MethodAccessor findMethod(Method method, RemapMethod remap, Class<?>[] rawTypes, Class<?> rawReturnType) {
         return methods.computeIfAbsent(new MethodData(method, rawReturnType, remap, rawTypes), __ -> {
-            if (remap.isStatic() && !Modifier.isStatic(method.getModifiers())) {
-                throw new IllegalStateException(String.format(
-                        "The static proxy method '%s' does not match the non-static target method", method.getName()
-                ));
-            }
-            if (!remap.isStatic() && Modifier.isStatic(method.getModifiers())) {
-                throw new IllegalStateException(String.format(
-                        "The proxy method '%s' does not match the static target method", method.getName()
-                ));
-            }
-
             String methodName = config.fetchMember(method);
             MethodType methodType = MethodType.methodType(rawReturnType, rawTypes);
             return new DynamicMethodAccessor(getHandleClass(), methodName, methodType, remap);

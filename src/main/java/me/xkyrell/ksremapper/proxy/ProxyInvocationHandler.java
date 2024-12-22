@@ -1,6 +1,7 @@
 package me.xkyrell.ksremapper.proxy;
 
 import lombok.RequiredArgsConstructor;
+import me.xkyrell.ksremapper.RemapProxy;
 import me.xkyrell.ksremapper.accessor.*;
 import me.xkyrell.ksremapper.annotation.*;
 import java.lang.invoke.MethodHandle;
@@ -42,18 +43,27 @@ public class ProxyInvocationHandler implements InvocationHandler {
                         mapper.getProxyClass().getSimpleName(), value
                 );
             }
+
             return value;
         }
 
         RemapField remapField = method.getAnnotation(RemapField.class);
         if (remapField != null) {
+            if (handle == null && !remapField.isStatic()) {
+                throw new IllegalStateException(String.format(
+                        "Proxy method '%s' must be marked as isStatic = true for static proxy.",
+                        method.getName()
+                ));
+            }
+
             FieldAccessor accessor = mapper.findField(method, remapField, method.getReturnType());
             if (remapField.mode() == RemapField.Mode.GET) {
                 if (args != null && args.length > 0) {
                     throw new IllegalArgumentException("The GET operation requires 0 arguments!");
                 }
 
-                return accessor.get(handle);
+                Object value = accessor.get(handle);
+                return proxyOrSource(method, value);
             }
 
             if (args == null || args.length != 1) {
@@ -66,14 +76,29 @@ public class ProxyInvocationHandler implements InvocationHandler {
 
         RemapMethod remapMethod = method.getAnnotation(RemapMethod.class);
         if (remapMethod != null) {
+            if (handle == null && !remapMethod.isStatic()) {
+                throw new IllegalStateException(String.format(
+                        "Proxy method '%s' must be marked as isStatic = true for static proxy.",
+                        method.getName()
+                ));
+            }
+
             Class<?>[] rawTypes = factory.getParameterTypes(unwrapArguments);
             MethodAccessor accessor = mapper.findMethod(method, remapMethod, rawTypes, method.getReturnType());
-            return accessor.invoke(handle, unwrapArguments);
+            Object value = accessor.invoke(handle, unwrapArguments);
+            return proxyOrSource(method, value);
         }
 
         throw new IllegalStateException(
                 "Proxy method " + method + " must have a annotation of either @RemapMethod or @RemapField"
         );
+    }
+
+    @SuppressWarnings("unchecked")
+    private Object proxyOrSource(Method method, Object value) {
+        return (value != null && RemapProxy.class.isAssignableFrom(method.getReturnType()))
+                ? factory.remap((Class<? extends RemapProxy>) method.getReturnType(), value)
+                : value;
     }
 
     private boolean isToStringMethod(Method method) {

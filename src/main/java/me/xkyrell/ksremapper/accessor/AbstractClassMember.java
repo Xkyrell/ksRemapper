@@ -16,7 +16,7 @@ public abstract class AbstractClassMember<T, A extends Annotation> {
             methodHandle = prepareAccessor(handleClass, name, type, remap);
         }
         catch (IllegalAccessException ex) {
-            throw new RuntimeException(ex);
+            throw new RuntimeException(ex.getCause());
         }
         catch (ReflectiveOperationException ex) {
             throw new IllegalStateException(String.format(
