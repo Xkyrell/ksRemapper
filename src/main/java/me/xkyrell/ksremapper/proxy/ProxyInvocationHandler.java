@@ -56,7 +56,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
                 ));
             }
 
-            FieldAccessor accessor = mapper.findField(method, remapField, method.getReturnType());
+            FieldAccessor accessor = mapper.findField(method, remapField);
             if (remapField.mode() == RemapField.Mode.GET) {
                 if (args != null && args.length > 0) {
                     throw new IllegalArgumentException("The GET operation requires 0 arguments!");
@@ -84,7 +84,7 @@ public class ProxyInvocationHandler implements InvocationHandler {
             }
 
             Class<?>[] rawTypes = factory.getParameterTypes(unwrapArguments);
-            MethodAccessor accessor = mapper.findMethod(method, remapMethod, rawTypes, method.getReturnType());
+            MethodAccessor accessor = mapper.findMethod(method, remapMethod, rawTypes);
             Object value = accessor.invoke(handle, unwrapArguments);
             return proxyOrSource(method, value);
         }

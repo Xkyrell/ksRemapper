@@ -28,11 +28,13 @@ public class ProxyInvocationMapper {
     private final Map<MethodData, MethodAccessor> methods = new HashMap<>();
     private final Map<Method, MethodHandle> objectMethods = new HashMap<>();
 
-    public FieldAccessor findField(Method method, RemapField remap, Class<?> rawReturnType) {
-        FieldData data = new FieldData(method, rawReturnType, remap);
+    public FieldAccessor findField(Method method, RemapField remap) {
+        FieldData data = new FieldData(method, remap);
         return getFieldCache(remap.mode()).computeIfAbsent(data, __ -> {
             String fieldName = config.fetchMember(method);
-            return new DynamicFieldAccessor(getHandleClass(), fieldName, remap.mode().apply(method), remap);
+            return new DynamicFieldAccessor(
+                    getHandleClass(), fieldName, remap.mode().apply(method), remap
+            );
         });
     }
 
@@ -55,10 +57,10 @@ public class ProxyInvocationMapper {
         });
     }
 
-    public MethodAccessor findMethod(Method method, RemapMethod remap, Class<?>[] rawTypes, Class<?> rawReturnType) {
-        return methods.computeIfAbsent(new MethodData(method, rawReturnType, remap, rawTypes), __ -> {
+    public MethodAccessor findMethod(Method method, RemapMethod remap, Class<?>[] rawTypes) {
+        return methods.computeIfAbsent(new MethodData(method, remap, rawTypes), __ -> {
             String methodName = config.fetchMember(method);
-            MethodType methodType = MethodType.methodType(rawReturnType, rawTypes);
+            MethodType methodType = MethodType.methodType(method.getReturnType(), rawTypes);
             return new DynamicMethodAccessor(getHandleClass(), methodName, methodType, remap);
         });
     }
@@ -94,7 +96,6 @@ public class ProxyInvocationMapper {
     private static abstract class AbstractMemberData<A extends Annotation> {
 
         protected final Method method;
-        protected final Class<?> rawReturnType;
         protected final A remap;
 
     }
@@ -103,8 +104,8 @@ public class ProxyInvocationMapper {
     @EqualsAndHashCode(callSuper = true)
     private static final class FieldData extends AbstractMemberData<RemapField> {
 
-        private FieldData(Method method, Class<?> rawReturnType, RemapField remap) {
-            super(method, rawReturnType, remap);
+        private FieldData(Method method, RemapField remap) {
+            super(method, remap);
         }
     }
 
@@ -114,8 +115,8 @@ public class ProxyInvocationMapper {
 
         private final Class<?>[] rawTypes;
 
-        private MethodData(Method method, Class<?> rawReturnType, RemapMethod remap, Class<?>[] rawTypes) {
-            super(method, rawReturnType, remap);
+        private MethodData(Method method, RemapMethod remap, Class<?>[] rawTypes) {
+            super(method, remap);
 
             this.rawTypes = rawTypes;
         }
