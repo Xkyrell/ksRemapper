@@ -7,6 +7,8 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.xkyrell.ksremapper.annotation.RemapClass;
 import me.xkyrell.ksremapper.annotation.RemapTarget;
+
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.function.Function;
